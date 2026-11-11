@@ -1,0 +1,44 @@
+---
+- name: Configurar servidores
+  hosts: docker
+  gather_facts: yes
+
+  tasks:
+    - name: Mostrar el nombre del host
+      debug:
+        msg: "El nombre del host es {{ inventory_hostname }}"
+
+    - name: Mostrar el sistema operativo
+      debug:
+        msg: "El sistema operativo es {{ ansible_distribution }} {{ ansible_distribution_version }}"
+
+    - name: Crear el directorio /tmp/ansible-demo
+      file:
+        path: /tmp/ansible-demo
+        state: directory
+
+    - name: Crear un archivo info.txt
+      file:
+        path: /tmp/ansible-demo/info.txt
+        state: touch
+
+    - name: Escribir en el archivo el nombre del servidor y el sistema operativo
+      copy:
+        dest: /tmp/ansible-demo/info.txt
+        content: |
+          Servidor: {{ inventory_hostname }}
+          Sistema operativo: {{ ansible_distribution }} {{ ansible_distribution_version }}
+
+    - name: Crear mediante un loop los directorios
+      file:
+        path: "/tmp/ansible-demo/{{ item }}"
+        state: directory
+      loop:
+        - logs
+        - backup
+        - config
+
+    - name: Mostrar un mensaje unicamente cuando el sistema operativo sea Ubuntu
+      debug:
+        msg: "El sistema operativo es Ubuntu."
+      when: ansible_distribution == "Ubuntu"
